@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K Pattern Museum</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #fff; color: #1a1a1a; }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+  }
+  .nav { display: flex; gap: 1.8rem; }
+  .nav a {
+    font-size: 12px; letter-spacing: 0.08em;
+    text-decoration: none; color: #1a1a1a; cursor: pointer;
+    background: none; border: none; font-family: inherit;
+    padding: 0;
+  }
+  .nav a:hover { opacity: 0.4; }
+  .nav a.current { border-bottom: 1.5px solid #1D9E75; padding-bottom: 2px; color: #1D9E75; }
+  .logo {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-family: 'Georgia', serif;
+    font-size: 13px; line-height: 1.25; text-align: center; letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+  .logo span { display: block; }
+  .header-icons { display: flex; gap: 1rem; font-size: 16px; cursor: pointer; }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ══════════════════════════
+     HOME / LANDING
+  ══════════════════════════ */
+  .hero {
+    position: relative; height: 92vh; min-height: 520px;
+    background: #2c2828;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  /* 이미지 교체: 아래 background-image url을 실제 사진 경로로 바꾸세요 */
+  .hero-img {
+    position: absolute; inset: 0;
+    background-image: url('images/hero.jpg');
+    background-size: cover; background-position: center;
+    opacity: 0.55;
+  }
+  .hero-text { text-align: center; color: #fff; z-index: 1; padding: 0 1rem; }
+  .hero-text h1 {
+    font-family: 'Georgia', serif;
+    font-size: clamp(28px, 5vw, 48px); font-weight: 400; letter-spacing: 0.05em;
+    margin-bottom: 0.6rem;
+    opacity: 0; animation: fadeUp 1.8s ease 0.3s forwards;
+  }
+  .hero-text p {
+    font-size: clamp(12px, 2vw, 15px); letter-spacing: 0.18em;
+    opacity: 0; animation: fadeUp 1.8s ease 0.8s forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero-scroll {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    font-size: 10px; letter-spacing: 0.2em; color: rgba(255,255,255,0.45);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .hero-scroll-line { width: 1px; height: 32px; background: rgba(255,255,255,0.25); }
+
+  .brand-story {
+    padding: 5rem 2rem;
+    text-align: center;
+    border-bottom: 0.5px solid #d0cdc7;
+  }
+  .brand-story p {
+    max-width: 560px; margin: 0 auto;
+    font-size: 15px; line-height: 2.1; color: #3a3a3a;
+  }
+
+  /* 이미지 스트립: 각 .img-block-bg 의 background-image를 실제 사진으로 교체 */
+  .image-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border-bottom: 0.5px solid #d0cdc7;
+  }
+  .img-block { aspect-ratio: 3/4; position: relative; overflow: hidden; cursor: pointer; }
+  .img-block-bg {
+    width: 100%; height: 100%;
+    background-size: cover; background-position: center;
+    transition: transform 0.6s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .img-block:hover .img-block-bg { transform: scale(1.04); }
+  /* 이미지 교체: url('images/strip1.jpg') 등으로 바꾸세요 */
+  .img-block-1 .img-block-bg { background-color: #2c2828; background-image: url('images/strip1.jpg'); }
+  .img-block-2 .img-block-bg { background-color: #1a3040; background-image: url('images/strip2.jpg'); }
+  .img-block-3 .img-block-bg { background-color: #3a2c1a; background-image: url('images/strip3.jpg'); }
+  .img-label {
+    position: absolute; bottom: 1.2rem; left: 1.2rem;
+    font-size: 11px; letter-spacing: 0.18em; color: #5DCAA5;
+  }
+
+  /* ══════════════════════════
+     ABOUT
+  ══════════════════════════ */
+  .about-wrapper { display: flex; min-height: 80vh; }
+  .about-sidebar {
+    width: 200px; flex-shrink: 0;
+    padding: 3rem 2rem;
+    border-right: 0.5px solid #d0cdc7;
+    position: sticky; top: 56px; align-self: flex-start;
+  }
+  .about-sidebar a {
+    display: block; font-size: 12px; letter-spacing: 0.06em;
+    text-decoration: none; color: #aaa; margin-bottom: 1.2rem; cursor: pointer;
+    transition: color 0.2s;
+  }
+  .about-sidebar a:hover, .about-sidebar a.active { color: #1D9E75; }
+  .about-content { flex: 1; padding: 3rem; }
+  .about-section { margin-bottom: 5rem; scroll-margin-top: 80px; }
+  .about-section h2 {
+    font-family: 'Georgia', serif;
+    font-size: 22px; font-weight: 400; letter-spacing: 0.03em;
+    margin-bottom: 2rem;
+  }
+  /* 이미지 교체: .about-img 의 background-image를 실제 사진으로 바꾸세요 */
+  .about-img {
+    width: 100%; aspect-ratio: 16/7;
+    background-color: #f0ece6;
+    background-image: url('images/about1.jpg');
+    background-size: cover; background-position: center;
+    margin-bottom: 2rem;
+  }
+  .about-img-2 { background-image: url('images/about2.jpg'); }
+  .about-text {
+    font-size: 14px; line-height: 2; color: #3a3a3a;
+    max-width: 620px; margin-bottom: 1.5rem;
+  }
+  .philosophy-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: #d0cdc7; margin-top: 2rem;
+  }
+  .philosophy-card { background: #fff; padding: 2rem 1.5rem; }
+  .philosophy-num { font-size: 10px; letter-spacing: 0.2em; color: #1D9E75; margin-bottom: 0.8rem; }
+  .philosophy-title { font-size: 14px; font-weight: 500; margin-bottom: 0.8rem; letter-spacing: 0.02em; }
+  .philosophy-body { font-size: 12px; line-height: 1.9; color: #666; }
+
+  /* ══════════════════════════
+     SHOP
+  ══════════════════════════ */
+  .shop-wrapper { display: flex; min-height: 80vh; }
+  .shop-sidebar {
+    width: 180px; flex-shrink: 0;
+    padding: 2.5rem 1.8rem;
+    border-right: 0.5px solid #d0cdc7;
+    position: sticky; top: 56px; align-self: flex-start;
+  }
+  .sidebar-title { font-size: 10px; letter-spacing: 0.18em; color: #aaa; margin-bottom: 1.2rem; }
+  .sidebar-link {
+    display: block; font-size: 12px; letter-spacing: 0.06em;
+    color: #888; margin-bottom: 0.9rem; cursor: pointer;
+    text-decoration: none; transition: color 0.2s; background: none; border: none; font-family: inherit; padding: 0;
+  }
+  .sidebar-link:hover, .sidebar-link.active { color: #1D9E75; }
+  .sidebar-link.active { font-weight: 500; }
+  .sidebar-divider { height: 0.5px; background: #e0ddd8; margin: 1.2rem 0; }
+  .shop-main { flex: 1; padding: 2.5rem 2rem; }
+  .shop-top-bar {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .shop-section-title {
+    font-family: 'Georgia', serif;
+    font-size: 18px; font-weight: 400; letter-spacing: 0.03em;
+  }
+  .sort-select {
+    font-size: 11px; letter-spacing: 0.08em; color: #888;
+    border: 0.5px solid #d0cdc7; padding: 5px 10px;
+    background: #fff; cursor: pointer; font-family: inherit;
+  }
+  .category-label {
+    font-family: 'Georgia', serif;
+    font-size: 15px; letter-spacing: 0.03em;
+    color: #1D9E75;
+    margin: 2.5rem 0 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 0.5px solid #1D9E75;
+  }
+  .product-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: #e0ddd8; margin-bottom: 3rem;
+  }
+  .product-card { background: #fff; cursor: pointer; }
+  .product-card:hover .product-img-inner { transform: scale(1.04); }
+  .product-card:hover .quick-overlay { opacity: 1; }
+  .product-img {
+    aspect-ratio: 3/4; overflow: hidden; position: relative;
+    background: #f5f2ee;
+  }
+  /* 이미지 교체: 각 상품카드의 .product-img 안에 <img src="images/product명.jpg"> 추가 또는
+     .product-img style="background-image:url(...)" 로 지정 */
+  .product-img-inner {
+    width: 100%; height: 100%;
+    background-size: cover; background-position: center;
+    transition: transform 0.5s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .quick-overlay {
+    position: absolute; inset: 0; opacity: 0;
+    transition: opacity 0.3s;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 1rem; background: rgba(0,0,0,0.04);
+  }
+  .quick-btn {
+    font-size: 10px; letter-spacing: 0.15em;
+    background: #1D9E75; color: #fff;
+    padding: 8px 20px; border: none; cursor: pointer; font-family: inherit;
+  }
+  .product-info { padding: 0.9rem 1rem 1.2rem; border-top: 0.5px solid #e0ddd8; }
+  .product-badge {
+    display: inline-block; font-size: 9px; letter-spacing: 0.15em;
+    background: #1D9E75; color: #fff; padding: 2px 7px; margin-bottom: 0.4rem;
+  }
+  .product-badge.sold { background: #aaa; }
+  .product-name { font-size: 12px; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .product-price { font-size: 12px; color: #888; letter-spacing: 0.04em; }
+
+  /* DETAIL */
+  .detail-view { display: none; }
+  .back-btn {
+    font-size: 11px; letter-spacing: 0.12em; color: #888;
+    cursor: pointer; margin-bottom: 2rem;
+    background: none; border: none; font-family: inherit; padding: 0;
+  }
+  .back-btn:hover { color: #1a1a1a; }
+  .detail-inner { display: flex; gap: 3rem; }
+  .detail-images { flex: 1.2; }
+  .detail-main-img {
+    aspect-ratio: 3/4; background: #f5f2ee;
+    /* 이미지 교체: background-image: url('images/상품명_detail.jpg') */
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .detail-main-img img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-thumb-row { display: flex; gap: 1px; margin-top: 1px; }
+  .detail-thumb {
+    flex: 1; aspect-ratio: 1; background: #ede9e3;
+    cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .detail-thumb:hover { opacity: 1; }
+  .detail-info { flex: 1; padding-top: 0.5rem; }
+  .detail-name {
+    font-family: 'Georgia', serif;
+    font-size: 20px; font-weight: 400; margin-bottom: 0.5rem;
+  }
+  .detail-price { font-size: 16px; margin-bottom: 1.5rem; letter-spacing: 0.04em; }
+  .detail-desc { font-size: 13px; line-height: 1.9; color: #555; margin-bottom: 2rem; }
+  .detail-meta { font-size: 11px; letter-spacing: 0.08em; color: #999; margin-bottom: 0.5rem; }
+  .buy-btn {
+    width: 100%; padding: 14px;
+    background: #1D9E75; color: #fff;
+    font-size: 12px; letter-spacing: 0.2em;
+    border: none; cursor: pointer; margin-bottom: 0.8rem; font-family: inherit;
+  }
+  .buy-btn:hover { background: #0F6E56; }
+  .cart-btn {
+    width: 100%; padding: 14px;
+    background: #fff; color: #1a1a1a;
+    font-size: 12px; letter-spacing: 0.2em;
+    border: 0.5px solid #1a1a1a; cursor: pointer; font-family: inherit;
+  }
+  .cart-btn:hover { background: #f5f5f5; }
+  .accordion { margin-top: 2rem; border-top: 0.5px solid #d0cdc7; }
+  .accordion-item { border-bottom: 0.5px solid #d0cdc7; padding: 1rem 0; cursor: pointer; }
+  .accordion-label { font-size: 11px; letter-spacing: 0.15em; color: #888; display: flex; justify-content: space-between; }
+
+  /* ══════════════════════════
+     FOOTER
+  ══════════════════════════ */
+  .site-footer {
+    border-top: 0.5px solid #d0cdc7;
+    padding: 3rem 2rem;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .footer-logo { font-family: 'Georgia', serif; font-size: 12px; line-height: 1.5; }
+  .footer-links { font-size: 11px; color: #888; letter-spacing: 0.08em; display: flex; flex-direction: column; gap: 0.4rem; text-align: right; }
+
+  /* ══════════════════════════
+     PLACEHOLDER SWATCHES (이미지 없을 때 임시 표시)
+  ══════════════════════════ */
+  .ph-yangdan {
+    width: 90px; height: 90px;
+    background: repeating-linear-gradient(90deg, #c8a050 0 3px, #8a5a20 3px 6px, #d4b870 6px 9px, #7a4a18 9px 12px);
+    opacity: 0.6;
+  }
+  .ph-bag-black {
+    width: 80px; height: 100px; background: #1a1a1a;
+    border-radius: 0 0 40% 40% / 0 0 20% 20%; position: relative;
+  }
+  .ph-bag-black::before {
+    content: ''; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    width: 36px; height: 18px; border: 2px solid #444; border-radius: 50% 50% 0 0; border-bottom: none;
+  }
+  .ph-bag-wine { width: 80px; height: 100px; background: #6b1a2a; border-radius: 0 0 40% 40% / 0 0 20% 20%; position: relative; }
+  .ph-bag-wine::before { content: ''; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 36px; height: 18px; border: 2px solid #8a2a3a; border-radius: 50% 50% 0 0; border-bottom: none; }
+  .ph-saekdong {
+    width: 90px; height: 72px;
+    background: repeating-linear-gradient(90deg, #e63946 0 8px, #f4a261 8px 16px, #2a9d8f 16px 24px, #264653 24px 32px, #e9c46a 32px 40px, #6a4c93 40px 48px);
+    opacity: 0.85;
+  }
+  .ph-blue { width: 90px; height: 90px; background: #1a3a6a; opacity: 0.7; }
+  .ph-green { width: 90px; height: 90px; background: #1a4a2a; opacity: 0.7; }
+  .ph-norigae { display: flex; gap: 8px; }
+  .ph-norigae-stick { width: 16px; height: 70px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     HEADER
+════════════════════════════ -->
+<header class="header">
+  <nav class="nav">
+    <a onclick="showPage('home')" id="nav-about">About</a>
+    <a onclick="showPage('home')" id="nav-bojagi">Bojagi</a>
+    <a onclick="showPage('home')" id="nav-journal">Journal</a>
+    <a onclick="showPage('shop')" id="nav-shop">Shop</a>
+    <a onclick="showPage('home')" id="nav-kclass">K-class</a>
+    <a onclick="showPage('home')" id="nav-wallpaper">Wallpaper</a>
+  </nav>
+  <div class="logo">
+    <span style="font-size:10px;letter-spacing:0.1em;">k</span>
+    <span>pattern</span>
+    <span>museum</span>
+  </div>
+  <div class="header-icons">
+    <span title="검색">⌕</span>
+    <span title="로그인">⊙</span>
+    <span title="장바구니">⊏</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════
+     HOME PAGE
+════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- HERO
+       이미지 교체: images/hero.jpg 파일을 같은 폴더에 넣으세요 -->
+  <section class="hero">
+    <div class="hero-img"></div>
+    <div class="hero-text">
+      <h1>Present Your Korea</h1>
+      <p style="color:#5DCAA5;">지금 당신의 서울을 선물하세요.</p>
+    </div>
+    <div class="hero-scroll">
+      <div class="hero-scroll-line"></div>
+      SCROLL
+    </div>
+  </section>
+
+  <!-- BRAND STORY -->
+  <section class="brand-story">
+    <p>
+      케이패턴뮤지엄은 한국문화에 정서가 깃든 고유한 패턴을 통해,<br>
+      우리나라가 가진 정체성을 재조명하고,<br>
+      그 속에 숨겨진 이야기를 감도 높은 제품으로 표현합니다.
+    </p>
+  </section>
+
+  <!-- IMAGE STRIP
+       이미지 교체: images/strip1.jpg / strip2.jpg / strip3.jpg -->
+  <section class="image-strip">
+    <div class="img-block img-block-1">
+      <div class="img-block-bg"></div>
+      <div class="img-label">BOJAGI</div>
+    </div>
+    <div class="img-block img-block-2">
+      <div class="img-block-bg"></div>
+      <div class="img-label">PATTERN</div>
+    </div>
+    <div class="img-block img-block-3">
+      <div class="img-block-bg"></div>
+      <div class="img-label">HERITAGE</div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <div class="about-wrapper">
+    <aside class="about-sidebar">
+      <a class="active" href="#sec-kpm">K-Pattern Museum</a>
+      <a href="#sec-story">Brand Story</a>
+      <a href="#sec-philosophy">Brand Philosophy</a>
+    </aside>
+    <div class="about-content">
+
+      <div class="about-section" id="sec-kpm">
+        <h2>K-Pattern Museum</h2>
+        <!-- 이미지 교체: images/about1.jpg -->
+        <div class="about-img"></div>
+        <p class="about-text">
+          패턴은 일반적으로 반복되거나 규칙적인 형태나 디자인을 의미합니다. 시각적 요소뿐만 아니라, 행동이나 사건의 반복적인 경향을 설명하는 경우에도 사용됩니다. 단순한 디자인적 요소를 넘어, 역사와 정서를 엮는 복합적 단어로도 볼 수 있습니다.
+        </p>
+        <p class="about-text">
+          케이패턴뮤지엄은 한국문화에 정서가 깃든 고유한 패턴을 통해, 우리나라가 가진 정체성을 재조명하고, 그 속에 숨겨진 이야기를 감도 높은 제품으로 표현합니다.
+        </p>
+      </div>
+
+      <div class="about-section" id="sec-story">
+        <h2>Brand Story</h2>
+        <!-- 이미지 교체: images/about2.jpg -->
+        <div class="about-img about-img-2"></div>
+        <p class="about-text">
+          보자기는 오래전부터 내려온 우리나라의 전통으로 사람을 정성껏 대하고 물건을 소중히 다루는 한국의 정서를 담고 있습니다.
+        </p>
+        <p class="about-text">
+          "복을 싸서 선물하다"라는 뜻을 지닌 보자기는 당신과 나 사이의 소통을 위한 '내면의 마음을 전하는 도구'로 불립니다.
+        </p>
+      </div>
+
+      <div class="about-section" id="sec-philosophy">
+        <h2>Brand Philosophy</h2>
+        <div class="philosophy-grid">
+          <div class="philosophy-card">
+            <div class="philosophy-num">( 01 )</div>
+            <div class="philosophy-title">Korea Vintage</div>
+            <div class="philosophy-body">버려지는 한국의 전통원단을 활용한 제품을 만듭니다. 새로운 원단을 생산하는 대신, 이미 존재하는 전통자원을 활용하여 본질적인 가치를 탐구합니다.</div>
+          </div>
+          <div class="philosophy-card">
+            <div class="philosophy-num">( 02 )</div>
+            <div class="philosophy-title">Sorry, we are sold out</div>
+            <div class="philosophy-body">판매가 완료된 상품은 다시 만날 수 없는 한정판 상품입니다. 전통-환경-아름다움이 가진 근원적 본질에 가치를 두고, 지구를 위한 자원순환을 지향합니다.</div>
+          </div>
+          <div class="philosophy-card">
+            <div class="philosophy-num">( 03 )</div>
+            <div class="philosophy-title">100% made in Seoul</div>
+            <div class="philosophy-body">광장시장, 동대문시장에서 20년 이상 자부심을 가지고 활동해온 봉제사장님과 전통 장인분들의 자문과 지혜로 제품이 탄생합니다.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div>
+      <div class="footer-logo">k<br>pattern<br>museum</div>
+      <div style="font-size:11px;color:#aaa;margin-top:0.8rem;">© 2026 K-Pattern Museum</div>
+    </div>
+    <div class="footer-links">
+      <span>kpatternmuseum.com</span>
+      <span>kpatternmuseum@gmail.com</span>
+      <span>Seoul, Korea</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════════════════
+     SHOP PAGE
+════════════════════════════ -->
+<div id="page-shop" class="page">
+  <div class="shop-wrapper">
+    <aside class="shop-sidebar">
+      <div class="sidebar-title">CATEGORY</div>
+      <button class="sidebar-link active" onclick="filterCat('all',this)">All Items</button>
+      <div class="sidebar-divider"></div>
+      <button class="sidebar-link" onclick="filterCat('bojagi',this)">Bojagi</button>
+      <button class="sidebar-link" onclick="filterCat('bag',this)">Bojagi Bag</button>
+      <button class="sidebar-link" onclick="filterCat('norigae',this)">Norigae</button>
+      <button class="sidebar-link" onclick="filterCat('other',this)">Other</button>
+    </aside>
+
+    <div class="shop-main">
+      <!-- GRID VIEW -->
+      <div id="grid-view">
+        <div class="shop-top-bar">
+          <div class="shop-section-title" id="section-title">All Items</div>
+          <select class="sort-select">
+            <option>기본 정렬</option>
+            <option>낮은 가격순</option>
+            <option>높은 가격순</option>
+          </select>
+        </div>
+
+        <!-- BOJAGI -->
+        <div id="cat-bojagi">
+          <div class="category-label">Bojagi</div>
+          <div class="product-grid">
+
+            <div class="product-card" onclick="openDetail({name:'양단 보자기 — 모란',price:'₩38,000',desc:'광장시장에서 수집한 전통 양단 원단으로 제작된 한정판 보자기입니다. 모란 문양이 정교하게 직조되어 있으며, 판매 완료 후 재생산하지 않습니다.',img:'images/bojagi_moran.jpg'})">
+              <div class="product-img">
+                <!-- 이미지 교체: <img src="images/bojagi_moran.jpg" style="width:100%;height:100%;object-fit:cover;"> -->
+                <div class="product-img-inner"><div class="ph-yangdan"></div></div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-badge">LIMITED</div>
+                <div class="product-name">양단 보자기 — 모란</div>
+                <div class="product-price">₩38,000</div>
+              </div>
+            </div>
+
+            <div class="product-card" onclick="openDetail({name:'공단 보자기 — 미드나잇',price:'₩42,000',desc:'깊은 네이비 톤의 공단 원단 보자기입니다. 부드러운 광택이 특징이며, 선물 포장에 최적화된 사이즈입니다.',img:'images/bojagi_midnight.jpg'})">
+              <div class="product-img">
+                <div class="product-img-inner"><div class="ph-blue"></div></div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-badge">LIMITED</div>
+                <div class="product-name">공단 보자기 — 미드나잇</div>
+                <div class="product-price">₩42,000</div>
+              </div>
+            </div>
+
+            <div class="product-card" onclick="openDetail({name:'광목 보자기 — 내추럴',price:'₩28,000',desc:'미표백 광목 원단의 자연스러운 결을 살린 보자기입니다. 일상 사용에 적합한 가장 대중적인 보자기 소재입니다.',img:'images/bojagi_natural.jpg'})">
+              <div class="product-img">
+                <div class="product-img-inner"><div class="ph-green"></div></div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-name">광목 보자기 — 내추럴</div>
+                <div class="product-price">₩28,000</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- BOJAGI BAG -->
+        <div id="cat-bag">
+          <div class="category-label">Bojagi Bag</div>
+          <div class="product-grid">
+
+            <div class="product-card" onclick="openDetail({name:'보자기 백 — 블랙 양단',price:'₩185,000',desc:'광장시장 20년 이상 경력의 봉제사와 함께 제작된 한정판 보자기 백입니다. 전통 양단 원단을 사용하였으며 사용이 완료되면 재생산하지 않습니다.',img:'images/bag_black.jpg'})">
+              <div class="product-img">
+                <div class="product-img-inner"><div class="ph-bag-black"></div></div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-badge sold">SOLD OUT</div>
+                <div class="product-name">보자기 백 — 블랙 양단</div>
+                <div class="product-price">₩185,000</div>
+              </div>
+            </div>
+
+            <div class="product-card" onclick="openDetail({name:'보자기 백 — 와인',price:'₩175,000',desc:'깊은 와인 컬러의 공단 원단으로 제작된 보자기 백입니다. 드레스업과 캐주얼 모두에 어울리는 컬러입니다.',img:'images/bag_wine.jpg'})">
+              <div class="product-img">
+                <div class="product-img-inner"><div class="ph-bag-wine"></div></div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-name">보자기 백 — 와인</div>
+                <div class="product-price">₩175,000</div>
+              </div>
+            </div>
+
+            <div class="product-card" onclick="openDetail({name:'보자기 백 — 색동',price:'₩165,000',desc:'한국 전통 색동 패턴을 현대적으로 재해석한 보자기 백입니다. 오방색의 생동감이 특징입니다.',img:'images/bag_saekdong.jpg'})">
+              <div class="product-img">
+                <div class="product-img-inner"><div class="ph-saekdong"></div></div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-name">보자기 백 — 색동</div>
+                <div class="product-price">₩165,000</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- NORIGAE -->
+        <div id="cat-norigae">
+          <div class="category-label">Norigae</div>
+          <div class="product-grid">
+            <div class="product-card" onclick="openDetail({name:'노리개 키링 — 오방색',price:'₩35,000',desc:'전통 노리개에서 영감을 받은 키링입니다. 오방색 실로 매듭지어 제작되며, 가방 참장식으로 활용하기 좋습니다.',img:'images/norigae.jpg'})">
+              <div class="product-img">
+                <div class="product-img-inner">
+                  <div class="ph-norigae">
+                    <div class="ph-norigae-stick" style="background:linear-gradient(180deg,#c8a050,#8a2a3a,#2a5a8a,#2a8a3a);"></div>
+                    <div class="ph-norigae-stick" style="background:linear-gradient(180deg,#2a5a8a,#8a2a3a,#2a8a3a,#c8a050);"></div>
+                  </div>
+                </div>
+                <div class="quick-overlay"><button class="quick-btn">QUICK VIEW</button></div>
+              </div>
+              <div class="product-info">
+                <div class="product-name">노리개 키링 — 오방색</div>
+                <div class="product-price">₩35,000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /grid-view -->
+
+      <!-- DETAIL VIEW -->
+      <div class="detail-view" id="detail-view">
+        <button class="back-btn" onclick="closeDetail()">← BACK TO SHOP</button>
+        <div class="detail-inner">
+          <div class="detail-images">
+            <div class="detail-main-img" id="detail-main-img">
+              <!-- 이미지는 JS로 채워짐 -->
+            </div>
+            <div class="detail-thumb-row">
+              <div class="detail-thumb"></div>
+              <div class="detail-thumb"></div>
+              <div class="detail-thumb"></div>
+            </div>
+          </div>
+          <div class="detail-info">
+            <div class="detail-name" id="detail-name"></div>
+            <div class="detail-price" id="detail-price"></div>
+            <div class="detail-meta">국내 배송 · 50,000원 이상 무료배송</div>
+            <div class="detail-desc" id="detail-desc"></div>
+            <button class="buy-btn">BUY NOW</button>
+            <button class="cart-btn">ADD TO CART</button>
+            <div class="accordion">
+              <div class="accordion-item"><div class="accordion-label">PAYMENT <span>+</span></div></div>
+              <div class="accordion-item"><div class="accordion-label">DELIVERY <span>+</span></div></div>
+              <div class="accordion-item"><div class="accordion-label">RETURN &amp; EXCHANGE <span>+</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /shop-main -->
+  </div><!-- /shop-wrapper -->
+
+  <footer class="site-footer">
+    <div>
+      <div class="footer-logo">k<br>pattern<br>museum</div>
+      <div style="font-size:11px;color:#aaa;margin-top:0.8rem;">© 2026 K-Pattern Museum</div>
+    </div>
+    <div class="footer-links">
+      <span>kpatternmuseum.com</span>
+      <span>kpatternmuseum@gmail.com</span>
+    </div>
+  </footer>
+</div><!-- /page-shop -->
+
+<script>
+  /* ── 페이지 전환 ── */
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav a').forEach(a => a.classList.remove('current'));
+    const map = { home: 'nav-about', shop: 'nav-shop' };
+    if (map[id]) document.getElementById(map[id]).classList.add('current');
+    window.scrollTo(0, 0);
+  }
+
+  /* ── Shop: 카테고리 필터 ── */
+  function filterCat(cat, el) {
+    document.querySelectorAll('.sidebar-link').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    const titles = { all: 'All Items', bojagi: 'Bojagi', bag: 'Bojagi Bag', norigae: 'Norigae', other: 'Other' };
+    document.getElementById('section-title').textContent = titles[cat] || 'All Items';
+    const catMap = { bojagi: 'cat-bojagi', bag: 'cat-bag', norigae: 'cat-norigae' };
+    ['cat-bojagi','cat-bag','cat-norigae'].forEach(id => {
+      document.getElementById(id).style.display =
+        (cat === 'all' || catMap[cat] === id) ? 'block' : 'none';
+    });
+  }
+
+  /* ── Shop: 상품 상세 ── */
+  function openDetail(p) {
+    document.getElementById('grid-view').style.display = 'none';
+    const dv = document.getElementById('detail-view');
+    dv.style.display = 'block';
+    document.getElementById('detail-name').textContent = p.name;
+    document.getElementById('detail-price').textContent = p.price;
+    document.getElementById('detail-desc').textContent = p.desc;
+    /* 이미지 교체: p.img 경로에 실제 파일이 있으면 자동으로 표시됩니다 */
+    const imgEl = document.getElementById('detail-main-img');
+    imgEl.innerHTML = p.img
+      ? '<img src="' + p.img + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">'
+      : '';
+  }
+
+  function closeDetail() {
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('grid-view').style.display = 'block';
+  }
+</script>
+</body>
+</html>
